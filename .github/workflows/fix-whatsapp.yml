@@ -1,0 +1,30 @@
+name: Fix WhatsApp order number
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set WhatsApp order number
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old="let [num,branch]=document.getElementById('branch').value.split('|');"
+          new="let num='923330252479';let branch=document.getElementById('branch').value.split('|')[1];"
+          if old not in s:
+              raise SystemExit('target code not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Fix WhatsApp order destination"
+          git push
