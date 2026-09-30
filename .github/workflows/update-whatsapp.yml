@@ -1,4 +1,4 @@
-name: Set WhatsApp Order Number
+name: Update site verification and WhatsApp
 
 on:
   push:
@@ -15,21 +15,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Update WhatsApp number
+      - name: Update verification and WhatsApp number
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          s = re.sub(r'https://wa\.me/\d+', 'https://wa.me/03330252479', s)
+          s = re.sub(r'https://wa\.me/\d+', 'https://wa.me/923330252479', s)
+          tag = '<meta name="google-site-verification" content="CVnK2M8aV9ojlfe1q8LN9-cpdOqjLaGfNtFQRX-8Wn4" />'
+          if 'google-site-verification' not in s:
+              s = s.replace('</head>', tag + '</head>', 1)
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Commit updated number
+      - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "Update WhatsApp order number"
+          git diff --cached --quiet || git commit -m "Add Google Search Console verification tag"
           git push
